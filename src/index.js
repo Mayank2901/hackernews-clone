@@ -4,9 +4,16 @@ import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 import { BrowserRouter } from 'react-router-dom';
+import createStore from "./store";
+
+const preloadedState = window.REDUX_DATA
+
+delete window.REDUX_DATA
+
+const store = createStore( preloadedState );
 
 ReactDOM.hydrate(
-    <BrowserRouter><App /></BrowserRouter>,
+    <BrowserRouter><App store={store}/></BrowserRouter>,
     document.getElementById('root')
 );
 

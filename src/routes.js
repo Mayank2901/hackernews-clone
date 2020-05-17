@@ -1,11 +1,13 @@
-import Test from './Test.js'
+import Feed from './components/feed.js'
 import FourOFour from './404.js'
+import { fetchFeedPage } from './store/index'
 
 const routes= [
     {
         path: '/',
-        component: Test,
-        exact: true
+        component: Feed,
+        exact: true,
+        serverFetch: fetchFeedPage,
     },
     {
         component: FourOFour

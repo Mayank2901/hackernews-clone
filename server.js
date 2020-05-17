@@ -12,52 +12,78 @@ const fs = require("fs");
 const routes = require('./src/routes').default
 const matchPath = require('react-router').matchPath;
 const StaticRouter = require('react-router-dom').StaticRouter;
+const createStore = require('./src/store').default
 
 const serveHTML = (req, res, next) => {
-        console.log('serveHTML')
         // insert html into the reponse from index.html
         const filePath = path.resolve(__dirname, 'build/index.html');
-        fs.readFile(filePath, 'utf8', (err, htmlData) => {
+        fs.readFile(filePath, 'utf8',async (err, htmlData) => {
             if (err) {
                 console.error('err', err);
                 return res.status(404).end()
             }
-            // render the app as a string
-            const html = ReactDOMServer.renderToString(
-                <StaticRouter location={req.url} context={{}}>
-                    <App />
-                </StaticRouter>
-            );
-
-            // inject the rendered app into our html and send it
-            let match = routes.find(route => matchPath(req.path, {
-                path: route.path,
-                exact: true,
-            }));
-            if(match){
-                res.set('Content-Type', 'text/html')
-                res.status(200).send(
-                    htmlData.replace(
-                        '<div id="root"></div>',
-                        `<div id="root">${html}</div>`
-                    )
-                );
-            }
             else{
-                match = matchPath(req.path, {
-                    path: "/static/*",
-                });
+                const store = createStore()
+                // inject the rendered app into our html and send it
+                let match = false, promise
+                await routes.some(route => {
+                    match = matchPath(req.path, {
+                        path: route.path,
+                        exact: true,
+                    });
+                    const { serverFetch } = route;
+                    if (match && serverFetch){
+                        promise = store.dispatch(serverFetch())
+                    }
+
+                    return match
+                })
                 if(match){
-                    next()
-                }
-                else{
+                    await promise
+                    // render the app as a string
+                    const html = ReactDOMServer.renderToString(
+                        <StaticRouter location={req.url} context={{}}>
+                            <App store={store}/>
+                        </StaticRouter>
+                    );
+
                     res.set('Content-Type', 'text/html')
-                    res.status(404).send(
+                    res.status(200).send(
                         htmlData.replace(
                             '<div id="root"></div>',
                             `<div id="root">${html}</div>`
+                        ).replace(
+                            '__REDUX_DATA__',
+                            JSON.stringify(store.getState())
                         )
                     );
+                }
+                else{
+                    match = matchPath(req.path, {
+                        path: "/static/*",
+                    });
+                    if(match){
+                        next()
+                    }
+                    else{
+                        // render the app as a string
+                        const html = ReactDOMServer.renderToString(
+                            <StaticRouter location={req.url} context={{}}>
+                                <App store={store}/>
+                            </StaticRouter>
+                        );
+
+                        res.set('Content-Type', 'text/html')
+                        res.status(404).send(
+                            htmlData.replace(
+                                '<div id="root"></div>',
+                                `<div id="root">${html}</div>`
+                            ).replace(
+                                '__REDUX_DATA__',
+                                JSON.stringify(store.getState())
+                            )
+                        );
+                    }
                 }
             }
         });
