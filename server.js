@@ -17,6 +17,7 @@ const createStore = require('./src/store').default
 const serveHTML = (req, res, next) => {
         // insert html into the reponse from index.html
         const filePath = path.resolve(__dirname, 'build/index.html');
+        let context = {}
         fs.readFile(filePath, 'utf8',async (err, htmlData) => {
             if (err) {
                 console.error('err', err);
@@ -41,7 +42,7 @@ const serveHTML = (req, res, next) => {
                 if(match){
                     await promise
                     // render the app as a string
-                    const html = ReactDOMServer.renderToString(<StaticRouter location={req.url} context={{}}><App store={store}/></StaticRouter>);
+                    const html = ReactDOMServer.renderToString(<StaticRouter location={req.url} context={context}><App store={store}/></StaticRouter>);
 
                     res.set('Content-Type', 'text/html')
                     res.status(200).send(
