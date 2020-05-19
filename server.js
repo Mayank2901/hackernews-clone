@@ -92,4 +92,4 @@ app.use(express.static(path.resolve(__dirname, 'build')))
 app.use(express.static(path.resolve(__dirname, 'public')))
 
 
-app.listen(PORT)
+app.listen(process.env.PORT || 3000)
