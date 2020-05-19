@@ -21,10 +21,10 @@ class Graph extends Component{
         myChart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: this.props.xValues,
+                labels: this.state.x,
                 datasets: [{
                     label: '# of Votes',
-                    data: this.props.yValues,
+                    data: this.state.y,
                     fill: false,
                     borderColor: "#6fcaef"
                 }]
@@ -35,16 +35,15 @@ class Graph extends Component{
     }
 
     componentDidUpdate(props){
-        console.log('props',props.yValues,this.state.y,(JSON.stringify(props.yValues) !== JSON.stringify(this.state.y)))
-        var ctx = document.getElementById('myChart');
         myChart.destroy();
+        var ctx = document.getElementById('myChart');
         myChart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: this.props.xValues,
+                labels: props.xValues,
                 datasets: [{
                     label: '# of Votes',
-                    data: this.props.yValues,
+                    data: props.yValues,
                     fill: false,
                     borderColor: "#6fcaef"
                 }]
