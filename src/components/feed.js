@@ -12,7 +12,7 @@ class Feed extends Component{
     constructor(props){
         super(props)
         this.state = {
-            stories: (this.props.feed_data? this.props.feed_data : []),
+            stories: (this.props.feed_data? this.props.feed_data : {hits:[]}),
             localData: {},
             pgIndex: 0,
             loading: false,

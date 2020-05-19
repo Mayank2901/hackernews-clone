@@ -12,6 +12,7 @@ delete window.REDUX_DATA
 
 const store = createStore( preloadedState );
 
+
 ReactDOM.hydrate(
     <BrowserRouter><App store={store}/></BrowserRouter>,
     document.getElementById('root')
