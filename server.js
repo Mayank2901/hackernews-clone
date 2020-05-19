@@ -41,11 +41,7 @@ const serveHTML = (req, res, next) => {
                 if(match){
                     await promise
                     // render the app as a string
-                    const html = ReactDOMServer.renderToString(
-                        <StaticRouter location={req.url} context={{}}>
-                            <App store={store}/>
-                        </StaticRouter>
-                    );
+                    const html = ReactDOMServer.renderToString(<StaticRouter location={req.url} context={{}}><App store={store}/></StaticRouter>);
 
                     res.set('Content-Type', 'text/html')
                     res.status(200).send(
