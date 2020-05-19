@@ -69,3 +69,18 @@
   background-color: #f60;
   border: none;
 }
+
+.grey {
+  color: #9a9797;
+  font-size: small;
+  font-weight: 700;
+}
+
+.hide {
+  font-size: small;
+}
+
+.anchor_no_underline {
+  color: black;
+  text-decoration: none;
+}

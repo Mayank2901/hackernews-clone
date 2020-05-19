@@ -5,6 +5,7 @@ import { connect } from "react-redux";
 import queryString from 'query-string';
 import { fetchFeed } from '../api'
 import Graph from './graph'
+import timeDifference from '../utils'
 
 class Feed extends Component{
 
@@ -23,7 +24,7 @@ class Feed extends Component{
     }
 
     componentDidMount(){
-        //window.localStorage.removeItem("upvotes");
+        //window.localStorage.removeItem("userUpvotesHides");
         let page = 0
         const queryValues = queryString.parse(this.props.location.search);
         if(Object.prototype.hasOwnProperty.call(queryValues, 'page')){
@@ -33,35 +34,54 @@ class Feed extends Component{
             }
         }
         let { stories, graphX, graphY } = this.state
+        console.log('stories',this.state.stories,stories.hits.length)
         let localData = window.localStorage.getItem("userUpvotesHides") || {}
+        let removeIndex = []
         if(typeof localData === 'string'){
             localData= JSON.parse(localData)
             stories.hits.map((story, index) => {
                 graphX.push(story.objectID)
                 graphY.push(story.points)
+                if(story.objectID=="15800676"){
+                    console.log('graphy1',graphY[graphY.length - 1])
+                }
                 if(localData.hasOwnProperty(story.objectID)){
-                    if(localData[story.objectID].hide){
-                        graphX.pop()
-                        graphY.pop()
-                        stories.hits[index].hidden = true
-                    }
                     if(localData[story.objectID].upvote > stories.hits[index].points){
                         stories.hits[index].points = localData[story.objectID].upvote
+                        graphY[graphY.length - 1] = localData[story.objectID].upvote
+                        if(story.objectID=="15800676"){
+                            console.log('graphy2',graphY[graphY.length - 1])
+                        }
                     }
                     else{
                         localData[story.objectID].upvote = stories.hits[index].points
                         localStorage.setItem("userUpvotesHides", JSON.stringify(localData))
                     }
+                    if(localData[story.objectID].hide){
+                        graphX.pop()
+                        graphY.pop()
+                        removeIndex.push(index)
+                        stories.hits[index].hidden = true
+                    }
                 }
             })
-            this.setState({
-                localData: localData,
-                stories: stories,
-                pgIndex: page,
-                graphX: graphX,
-                graphY: graphY
-            })
+            removeIndex.map((index) => stories.hits.splice(index,1))
+            console.log('graph0',graphX,graphY,stories,stories.hits.length,localData)
         }
+        else{
+            stories.hits.map((story, index) => {
+                graphX.push(story.objectID)
+                graphY.push(story.points)
+            }) 
+        }
+        this.setState({
+            localData: localData,
+            stories: stories,
+            pgIndex: page,
+            graphX: graphX,
+            graphY: graphY
+        })
+        console.log('graph',this.state.graphX,this.state.graphY)
     }
 
     componentDidUpdate(){
@@ -118,7 +138,7 @@ class Feed extends Component{
     }
 
     upvoteStory(id, index){
-        let { localData, stories } = this.state
+        let { localData, stories, graphY, graphX } = this.state
         if(localData.hasOwnProperty(id)){
             let item = localData[id]
             item["upvote"] += 1
@@ -129,16 +149,21 @@ class Feed extends Component{
             }
             localData[id]["upvote"] = (stories.hits[index].points + 1)
         }
+        console.log('upvote',stories.hits[index].points,localData[id]["upvote"],index)
         stories.hits[index].points = localData[id]["upvote"]
+        console.log('upvote1',index,graphY,graphY[index])
+        graphY[index] = stories.hits[index].points
+        console.log('upvote2',index,graphY[index])
         this.setState({
             localData: localData,
-            stories: stories
+            stories: stories,
+            graphY: graphY
         })
         localStorage.setItem("userUpvotesHides", JSON.stringify(localData))
     }
 
     hideStory(id, index){
-        let { localData, stories } = this.state
+        let { localData, stories, graphY, graphX } = this.state
         if(localData.hasOwnProperty(id)){
             let item = localData[id]
             item["hide"] = true
@@ -149,10 +174,15 @@ class Feed extends Component{
                 "hide": true
             }
         }
+        graphX.splice(index,1)
+        graphY.splice(index,1)
         stories.hits[index].hidden = true
+        stories.hits.splice(index,1)
         this.setState({
             localData: localData,
-            stories: stories
+            stories: stories,
+            graphX: graphX,
+            graphY: graphY
         })
         localStorage.setItem("userUpvotesHides", JSON.stringify(localData))
     }
@@ -171,6 +201,7 @@ class Feed extends Component{
 
     render(){
         let { stories, pgIndex, loading, graphX, graphY } = this.state
+        let currentTime = new Date()
         return(
             <div class="container">
                 <table class="feed_table">
@@ -184,12 +215,20 @@ class Feed extends Component{
                         // eslint-disable-next-line array-callback-return
                         stories.hits.map((story,index) => {
                             if(!story.hasOwnProperty("hidden")){
+                                let url = (story.url == null ? story.story_url: story.url)
                                 return (
                                     <tr class={index%2===0 ? "color_e0e0e0" : ""}>
                                         <td>{story.num_comments}</td>
                                         <td>{story.points}</td>
-                                        <td><button onClick={() => this.upvoteStory(story.objectID,index)}>Vote</button></td>
-                                        <td>{story.title} by {story.author} [<a onClick={() => this.hideStory(story.objectID,index)}>hide</a>]</td>
+                                        <td><a onClick={() => this.upvoteStory(story.objectID,index)}>▲</a></td>
+                                        <td>
+                                            <a class="anchor_no_underline" href={url}>{story.title}</a>
+                                            {url == null ? '' : (<span class="grey">( {(url.split("/")[2]).substring(4)} ) </span> ) }
+                                            <span class="grey"> by </span>
+                                            <span>{story.author}</span>
+                                            <span class="grey"> {timeDifference(currentTime, new Date(story.created_at))} </span>
+                                            [<a onClick={() => this.hideStory(story.objectID,index)} class="hide">hide</a>]
+                                        </td>
                                     </tr>
                                 )
                             }
@@ -206,7 +245,12 @@ class Feed extends Component{
                     </p>
                 }
                 <hr class="orange_hr"/>
-                <Graph xValues={graphX} yValues={graphY}/>
+                {
+                    (graphX.length > 0 && graphY.length > 0) ?
+                        <Graph xValues={graphX} yValues={graphY}/>
+                    :
+                        ""
+                }
             </div>
         )
     }
