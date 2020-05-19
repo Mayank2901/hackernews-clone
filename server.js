@@ -33,7 +33,7 @@ const serveHTML = (req, res, next) => {
                     });
                     const { serverFetch } = route;
                     if (match && serverFetch){
-                        promise = store.dispatch(serverFetch())
+                        promise = store.dispatch(serverFetch(req.url))
                     }
 
                     return match

@@ -1,6 +1,9 @@
 import React, { Component } from "react"
 import { fetchFeedPage } from '../store/index'
 import { connect } from "react-redux";
+import queryString from 'query-string';
+import { withRouter } from 'react-router';
+import { fetchFeed } from '../api'
 
 class Feed extends Component{
 
@@ -9,6 +12,8 @@ class Feed extends Component{
         this.state = {
             stories: (this.props.feed_data? this.props.feed_data : []),
             localData: {},
+            pgIndex: 0,
+            loading: false,
         }
         this.upvoteStory = this.upvoteStory.bind(this)
         this.hideStory = this.hideStory.bind(this)
@@ -16,6 +21,14 @@ class Feed extends Component{
 
     componentDidMount(){
         //window.localStorage.removeItem("upvotes");
+        let page = 0
+        const queryValues = queryString.parse(this.props.location.search);
+        if(Object.prototype.hasOwnProperty.call(queryValues, 'page')){
+            page = parseInt(queryValues.page)
+            if(isNaN(page)){
+                page = 0
+            }
+        }
         let { stories } = this.state
         let localData = window.localStorage.getItem("userUpvotesHides") || {}
         if(typeof localData === 'string'){
@@ -36,10 +49,42 @@ class Feed extends Component{
             })
             this.setState({
                 localData: localData,
-                stories: stories
+                stories: stories,
+                pgIndex: page
             })
         }
         console.log('stories',stories)
+    }
+
+    componentDidUpdate(){
+        let page = 0, that= this
+        const queryValues = queryString.parse(this.props.location.search);
+        if(Object.prototype.hasOwnProperty.call(queryValues, 'page')){
+            page = parseInt(queryValues.page)
+            if(isNaN(page)){
+                page = 0
+            }
+        }
+        if(this.state.pgIndex != page){
+            this.setState({
+                loading: true,
+                pgIndex: page,
+            })
+            fetchFeed(page)
+            .then((response) => {
+                console.log('response',response)
+                this.setState({
+                    stories: response,
+                })
+            })
+            .catch((error) => {
+                console.log('error',error)
+            })
+            .finally(() => {
+                this.setState({loading: false})
+            })
+
+        }
     }
 
     upvoteStory(id, index){
@@ -82,31 +127,54 @@ class Feed extends Component{
         localStorage.setItem("userUpvotesHides", JSON.stringify(localData))
     }
 
+    prev(){
+        let { pgIndex } = this.state
+        pgIndex = pgIndex - 1
+        this.props.history.push('/?page=' + pgIndex)
+    }
+
+    next(){
+        let { pgIndex } = this.state
+        pgIndex = pgIndex + 1
+        this.props.history.push('/?page=' + pgIndex)
+    }
+
     render(){
-        let { stories } = this.state
+        let { stories, pgIndex, loading } = this.state
         return(
-            <table>
-                <tr>
-                    <th>Comments</th>
-                    <th>Vote Count</th>
-                    <th>UpVote</th>
-                    <th colspan="5">News Details</th>
-                </tr>
-                {
-                    stories.hits.map((story,index)=>{
-                        if(!story.hasOwnProperty("hidden")){
-                            return (
-                                <tr>
-                                    <td>{story.num_comments}</td>
-                                    <td>{story.points}</td>
-                                    <td><button onClick={() => this.upvoteStory(story.objectID,index)}>Vote</button></td>
-                                    <td>{story.title} by {story.author} [<a onClick={() => this.hideStory(story.objectID,index)}>hide</a>]</td>
-                                </tr>
-                            )
-                        }
-                    })
+            <div>
+                <table class="feed_table">
+                    <tr class="orangeBG">
+                        <th>Comments</th>
+                        <th align="center">Vote Count</th>
+                        <th>UpVote</th>
+                        <th colspan="5" align="left">News Details</th>
+                    </tr>
+                    {
+                        stories.hits.map((story,index)=>{
+                            if(!story.hasOwnProperty("hidden")){
+                                return (
+                                    <tr class={index%2==0 ? "color_e0e0e0" : ""}>
+                                        <td>{story.num_comments}</td>
+                                        <td>{story.points}</td>
+                                        <td><button onClick={() => this.upvoteStory(story.objectID,index)}>Vote</button></td>
+                                        <td>{story.title} by {story.author} [<a onClick={() => this.hideStory(story.objectID,index)}>hide</a>]</td>
+                                    </tr>
+                                )
+                            }
+                        })
+                    }
+                </table>
+                {loading ? 
+                    ''
+                    :
+                    <p>
+                        <a onClick={pgIndex == 0 ? () => {} : this.prev.bind(this)}>Prev</a>
+                        <span> | </span>
+                        <a onClick={pgIndex == (stories.nbPages - 1) ? () => {} : this.next.bind(this)}>Next</a>
+                    </p>
                 }
-            </table>
+            </div>
         )
     }
 
@@ -123,5 +191,5 @@ const mapDispatchToProps = {
     fetchFeedPage,
 };
 
-export default connect(mapStateToProps,mapDispatchToProps)(Feed);
+export default withRouter(connect(mapStateToProps,mapDispatchToProps)(Feed));
 

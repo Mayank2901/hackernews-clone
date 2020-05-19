@@ -36,3 +36,20 @@
     transform: rotate(360deg);
   }
 }
+
+.feed_table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.orangeBG {
+  background-color: rgb(255, 102, 0);
+}
+
+.feed_table tr th{
+  font-size: 80%;
+}
+
+.color_e0e0e0 {
+  background-color: #e0e0e0;
+}

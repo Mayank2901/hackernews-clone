@@ -1,7 +1,8 @@
 import axios from 'axios';
+import { apiURL } from './constants'
 
-export function fetchFeed(){
-    return axios.get('https://hn.algolia.com/api/v1/search?tags=front_page')
+export function fetchFeed(page){
+    return axios.get(apiURL + '/v1/search?tags=story&page=' + page)
     .then(function (response) {
         return response.data
     })
