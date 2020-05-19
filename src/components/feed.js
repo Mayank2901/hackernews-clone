@@ -4,7 +4,7 @@ import { fetchFeedPage } from '../store/index'
 import { connect } from "react-redux";
 import queryString from 'query-string';
 import { fetchFeed } from '../api'
-import Graph from './Graph'
+import Graph from './graph'
 
 class Feed extends Component{
 
