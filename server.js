@@ -6,7 +6,6 @@ const ReactDOMServer = require('react-dom/server')
 const path = require('path')
 const express = require('express')
 
-const PORT = 3000
 const app = express()
 const fs = require("fs");
 const routes = require('./src/routes').default

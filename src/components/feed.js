@@ -4,6 +4,7 @@ import { fetchFeedPage } from '../store/index'
 import { connect } from "react-redux";
 import queryString from 'query-string';
 import { fetchFeed } from '../api'
+import Graph from './Graph'
 
 class Feed extends Component{
 
@@ -14,6 +15,8 @@ class Feed extends Component{
             localData: {},
             pgIndex: 0,
             loading: false,
+            graphX:[],
+            graphY:[],
         }
         this.upvoteStory = this.upvoteStory.bind(this)
         this.hideStory = this.hideStory.bind(this)
@@ -29,13 +32,17 @@ class Feed extends Component{
                 page = 0
             }
         }
-        let { stories } = this.state
+        let { stories, graphX, graphY } = this.state
         let localData = window.localStorage.getItem("userUpvotesHides") || {}
         if(typeof localData === 'string'){
             localData= JSON.parse(localData)
             stories.hits.map((story, index) => {
+                graphX.push(story.objectID)
+                graphY.push(story.points)
                 if(localData.hasOwnProperty(story.objectID)){
                     if(localData[story.objectID].hide){
+                        graphX.pop()
+                        graphY.pop()
                         stories.hits[index].hidden = true
                     }
                     if(localData[story.objectID].upvote > stories.hits[index].points){
@@ -50,10 +57,11 @@ class Feed extends Component{
             this.setState({
                 localData: localData,
                 stories: stories,
-                pgIndex: page
+                pgIndex: page,
+                graphX: graphX,
+                graphY: graphY
             })
         }
-        console.log('stories',stories)
     }
 
     componentDidUpdate(){
@@ -72,9 +80,31 @@ class Feed extends Component{
             })
             fetchFeed(page)
             .then((response) => {
-                console.log('response',response)
+                let graphX=[],graphY=[]
+                let { localData } = this.state
+                response.hits.map((story, index) => {
+                    graphX.push(story.objectID)
+                    graphY.push(story.points)
+                    if(localData.hasOwnProperty(story.objectID)){
+                        if(localData[story.objectID].hide){
+                            graphX.pop()
+                            graphY.pop()
+                            response.hits[index].hidden = true
+                        }
+                        if(localData[story.objectID].upvote > response.hits[index].points){
+                            response.hits[index].points = localData[story.objectID].upvote
+                        }
+                        else{
+                            localData[story.objectID].upvote = response.hits[index].points
+                            localStorage.setItem("userUpvotesHides", JSON.stringify(localData))
+                        }
+                    }
+                })
                 this.setState({
+                    localData: localData,
                     stories: response,
+                    graphY: graphY,
+                    graphX: graphX
                 })
             })
             .catch((error) => {
@@ -140,15 +170,14 @@ class Feed extends Component{
     }
 
     render(){
-        let { stories, pgIndex, loading } = this.state
+        let { stories, pgIndex, loading, graphX, graphY } = this.state
         return(
-            <div>
-                <p>testing it out</p>
+            <div class="container">
                 <table class="feed_table">
                     <tr class="orangeBG">
-                        <th>Comments</th>
-                        <th align="center">Vote Count</th>
-                        <th>UpVote</th>
+                        <th align="left">Comments</th>
+                        <th align="left">Vote Count</th>
+                        <th align="left">UpVote</th>
                         <th colspan="5" align="left">News Details</th>
                     </tr>
                     {
@@ -170,12 +199,14 @@ class Feed extends Component{
                 {loading ? 
                     ''
                     :
-                    <p>
+                    <p class="next_prev_btn">
                         <a onClick={pgIndex === 0 ? () => {} : this.prev.bind(this)}>Prev</a>
                         <span> | </span>
                         <a onClick={pgIndex === (stories.nbPages - 1) ? () => {} : this.next.bind(this)}>Next</a>
                     </p>
                 }
+                <hr class="orange_hr"/>
+                <Graph xValues={graphX} yValues={graphY}/>
             </div>
         )
     }

@@ -37,6 +37,10 @@
   }
 }
 
+.container {
+  margin: 2px
+}
+
 .feed_table {
   width: 100%;
   border-collapse: collapse;
@@ -52,4 +56,16 @@
 
 .color_e0e0e0 {
   background-color: #e0e0e0;
+}
+
+.next_prev_btn {
+  text-align:right;
+  color: #f60;
+  font-weight: 900;
+}
+
+.orange_hr {
+  height: 3px;
+  background-color: #f60;
+  border: none;
 }
