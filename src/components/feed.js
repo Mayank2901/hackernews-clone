@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-no-comment-textnodes */
 import React, { Component } from "react"
 import { fetchFeedPage } from '../store/index'
 import { connect } from "react-redux";
@@ -56,7 +57,7 @@ class Feed extends Component{
     }
 
     componentDidUpdate(){
-        let page = 0, that= this
+        let page = 0
         const queryValues = queryString.parse(this.props.location.search);
         if(Object.prototype.hasOwnProperty.call(queryValues, 'page')){
             page = parseInt(queryValues.page)
@@ -64,7 +65,7 @@ class Feed extends Component{
                 page = 0
             }
         }
-        if(this.state.pgIndex != page){
+        if(this.state.pgIndex !== page){
             this.setState({
                 loading: true,
                 pgIndex: page,
@@ -151,10 +152,11 @@ class Feed extends Component{
                         <th colspan="5" align="left">News Details</th>
                     </tr>
                     {
-                        stories.hits.map((story,index)=>{
+                        // eslint-disable-next-line array-callback-return
+                        stories.hits.map((story,index) => {
                             if(!story.hasOwnProperty("hidden")){
                                 return (
-                                    <tr class={index%2==0 ? "color_e0e0e0" : ""}>
+                                    <tr class={index%2===0 ? "color_e0e0e0" : ""}>
                                         <td>{story.num_comments}</td>
                                         <td>{story.points}</td>
                                         <td><button onClick={() => this.upvoteStory(story.objectID,index)}>Vote</button></td>
@@ -169,9 +171,9 @@ class Feed extends Component{
                     ''
                     :
                     <p>
-                        <a onClick={pgIndex == 0 ? () => {} : this.prev.bind(this)}>Prev</a>
+                        <a onClick={pgIndex === 0 ? () => {} : this.prev.bind(this)}>Prev</a>
                         <span> | </span>
-                        <a onClick={pgIndex == (stories.nbPages - 1) ? () => {} : this.next.bind(this)}>Next</a>
+                        <a onClick={pgIndex === (stories.nbPages - 1) ? () => {} : this.next.bind(this)}>Next</a>
                     </p>
                 }
             </div>

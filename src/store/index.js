@@ -3,7 +3,7 @@ import queryString from 'query-string';
 
 export const fetchFeedPage = (path) => (dispatch) =>{
     const queryValues = queryString.parse(path.substring(path.indexOf('?')));
-    var page = 0;
+    var page;
     if(Object.prototype.hasOwnProperty.call(queryValues, 'page')){
         const page = parseInt(queryValues.page)
         if(isNaN(page)){
