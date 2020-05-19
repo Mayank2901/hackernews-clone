@@ -97,6 +97,8 @@ class Feed extends Component{
             this.setState({
                 loading: true,
                 pgIndex: page,
+                graphY: [],
+                graphX: []
             })
             fetchFeed(page)
             .then((response) => {
