@@ -24,7 +24,7 @@
     "regenerator-runtime": "^0.13.5"
   },
   "scripts": {
-    "server": "yarn build && NODE_ENV=production node index.js",
+    "server": "yarn build && NODE_ENV=production node index.js"
   },
   "eslintConfig": {
     "extends": "react-app"
