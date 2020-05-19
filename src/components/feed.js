@@ -2,7 +2,6 @@ import React, { Component } from "react"
 import { fetchFeedPage } from '../store/index'
 import { connect } from "react-redux";
 import queryString from 'query-string';
-import { withRouter } from 'react-router';
 import { fetchFeed } from '../api'
 
 class Feed extends Component{
@@ -143,6 +142,7 @@ class Feed extends Component{
         let { stories, pgIndex, loading } = this.state
         return(
             <div>
+                <p>testing it out</p>
                 <table class="feed_table">
                     <tr class="orangeBG">
                         <th>Comments</th>
@@ -191,5 +191,5 @@ const mapDispatchToProps = {
     fetchFeedPage,
 };
 
-export default withRouter(connect(mapStateToProps,mapDispatchToProps)(Feed));
+export default connect(mapStateToProps,mapDispatchToProps)(Feed);
 
