@@ -7,7 +7,6 @@ class Graph extends Component{
 
     constructor(props){
         super(props)
-        console.log('constructor',props)
         this.state = {
             x: props.xValues,
             y: props.yValues,
@@ -16,7 +15,6 @@ class Graph extends Component{
     }
 
     componentDidMount(){
-        console.log('state',this.state.x,this.state.y,this.props)
         var ctx = document.getElementById('myChart');
         myChart = new Chart(ctx, {
             type: 'line',

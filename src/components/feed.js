@@ -35,7 +35,6 @@ class Feed extends Component{
         }
         //get data from local storage and check for hiding and upvoting stories from local storage
         let { stories, graphX, graphY } = this.state
-        console.log('stories',this.state.stories,stories.hits.length)
         let localData = window.localStorage.getItem("userUpvotesHides") || {}
         let removeIndex = []
         //if there is some data in local storage
@@ -44,16 +43,10 @@ class Feed extends Component{
             stories.hits.map((story, index) => {
                 graphX.push(story.objectID)
                 graphY.push(story.points)
-                if(story.objectID=="15800676"){
-                    console.log('graphy1',graphY[graphY.length - 1])
-                }
                 if(localData.hasOwnProperty(story.objectID)){
                     if(localData[story.objectID].upvote > stories.hits[index].points){
                         stories.hits[index].points = localData[story.objectID].upvote
                         graphY[graphY.length - 1] = localData[story.objectID].upvote
-                        if(story.objectID=="15800676"){
-                            console.log('graphy2',graphY[graphY.length - 1])
-                        }
                     }
                     else{
                         localData[story.objectID].upvote = stories.hits[index].points
@@ -68,7 +61,6 @@ class Feed extends Component{
                 }
             })
             removeIndex.map((index) => stories.hits.splice(index,1))
-            console.log('graph0',graphX,graphY,stories,stories.hits.length,localData)
         }
         else{   //there is no data in local storage, continue with getting data for graphs x-axis and y-axis
             stories.hits.map((story, index) => {
@@ -156,11 +148,8 @@ class Feed extends Component{
             }
             localData[id]["upvote"] = (stories.hits[index].points + 1)
         }
-        console.log('upvote',stories.hits[index].points,localData[id]["upvote"],index)
         stories.hits[index].points = localData[id]["upvote"]
-        console.log('upvote1',index,graphY,graphY[index])
         graphY[index] = stories.hits[index].points
-        console.log('upvote2',index,graphY[index])
         this.setState({
             localData: localData,
             stories: stories,

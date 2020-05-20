@@ -11,6 +11,7 @@ Made using React, Redux, Express, Chart.js and implements Server Side Rendering
 - src/components has components that are to be rendered
 - src/constants.js has API URL
 - src/store.js initializes the redux store with a provided initial state use by both frontend and server side
+- CircleCI for deploying to heroku after tests are passed
 
 ## Available Scripts
 
