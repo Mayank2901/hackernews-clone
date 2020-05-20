@@ -1,4 +1,16 @@
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Project Structure
+
+Made using React, Redux, Express, Chart.js and implements Server Side Rendering
+
+- server and client are booted from index.js in root folder
+- server.js hold the express server that reads index.html and modifies it according to the page requested for serving
+- src folder holds all the frontend code including tests
+- src/index.js loads data from thre redux store and hydrates app
+- src/routes.js has all routes and "serverFetch" key for each route that is used at server end for determining the api call to be done for each route
+- src/components has components that are to be rendered
+- src/constants.js has API URL
+- src/store.js initializes the redux store with a provided initial state use by both frontend and server side
 
 ## Available Scripts
 

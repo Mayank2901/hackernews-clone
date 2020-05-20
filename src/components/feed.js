@@ -12,7 +12,7 @@ class Feed extends Component{
     constructor(props){
         super(props)
         this.state = {
-            stories: (this.props.feed_data? this.props.feed_data : {hits:[]}),
+            stories: (this.props.feed_data? this.props.feed_data : {hits:[]}),  // save data from store into state
             localData: {},
             pgIndex: 0,
             loading: false,
@@ -24,6 +24,7 @@ class Feed extends Component{
     }
 
     componentDidMount(){
+        //set page number count
         let page = 0
         const queryValues = queryString.parse(this.props.location.search);
         if(Object.prototype.hasOwnProperty.call(queryValues, 'page')){
@@ -32,10 +33,12 @@ class Feed extends Component{
                 page = 0
             }
         }
+        //get data from local storage and check for hiding and upvoting stories from local storage
         let { stories, graphX, graphY } = this.state
         console.log('stories',this.state.stories,stories.hits.length)
         let localData = window.localStorage.getItem("userUpvotesHides") || {}
         let removeIndex = []
+        //if there is some data in local storage
         if(typeof localData === 'string'){
             localData= JSON.parse(localData)
             stories.hits.map((story, index) => {
@@ -67,7 +70,7 @@ class Feed extends Component{
             removeIndex.map((index) => stories.hits.splice(index,1))
             console.log('graph0',graphX,graphY,stories,stories.hits.length,localData)
         }
-        else{
+        else{   //there is no data in local storage, continue with getting data for graphs x-axis and y-axis
             stories.hits.map((story, index) => {
                 graphX.push(story.objectID)
                 graphY.push(story.points)
@@ -80,7 +83,6 @@ class Feed extends Component{
             graphX: graphX,
             graphY: graphY
         })
-        console.log('graph',this.state.graphX,this.state.graphY)
     }
 
     componentDidUpdate(){
@@ -92,6 +94,7 @@ class Feed extends Component{
                 page = 0
             }
         }
+        //run only if the page number is changes
         if(this.state.pgIndex !== page){
             this.setState({
                 loading: true,
@@ -99,6 +102,7 @@ class Feed extends Component{
                 graphY: [],
                 graphX: []
             })
+            //fetch stories for new page using api
             fetchFeed(page)
             .then((response) => {
                 let graphX=[],graphY=[]
@@ -106,6 +110,7 @@ class Feed extends Component{
                 response.hits.map((story, index) => {
                     graphX.push(story.objectID)
                     graphY.push(story.points)
+                    //check for hidden stories and upvotes if there are any in localstorage
                     if(localData.hasOwnProperty(story.objectID)){
                         if(localData[story.objectID].hide){
                             graphX.pop()
@@ -140,11 +145,12 @@ class Feed extends Component{
 
     upvoteStory(id, index){
         let { localData, stories, graphY, graphX } = this.state
+        //update localstorage value if upvote exists in local storage
         if(localData.hasOwnProperty(id)){
             let item = localData[id]
             item["upvote"] += 1
         }
-        else{
+        else{       //create it in local storage if it does not exist using story objectId as key and save hide and upvote properties
             localData[id] = {
                 hide: false
             }
@@ -165,11 +171,12 @@ class Feed extends Component{
 
     hideStory(id, index){
         let { localData, stories, graphY, graphX } = this.state
+        //update localstorage value if hide exists for this story in local storage
         if(localData.hasOwnProperty(id)){
             let item = localData[id]
             item["hide"] = true
         }
-        else{
+        else{   //create it in local storage if it does not exist using story objectId as key and save hide and upvote properties
             localData[id] = {
                 "upvote": (stories.hits[index].points + 1),
                 "hide": true
@@ -191,13 +198,13 @@ class Feed extends Component{
     prev(){
         let { pgIndex } = this.state
         pgIndex = pgIndex - 1
-        this.props.history.push('/?page=' + pgIndex)
+        this.props.history.push('/?page=' + pgIndex)    //update url
     }
 
     next(){
         let { pgIndex } = this.state
         pgIndex = pgIndex + 1
-        this.props.history.push('/?page=' + pgIndex)
+        this.props.history.push('/?page=' + pgIndex)    //update url
     }
 
     render(){
