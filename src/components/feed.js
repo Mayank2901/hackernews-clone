@@ -24,7 +24,6 @@ class Feed extends Component{
     }
 
     componentDidMount(){
-        //window.localStorage.removeItem("userUpvotesHides");
         let page = 0
         const queryValues = queryString.parse(this.props.location.search);
         if(Object.prototype.hasOwnProperty.call(queryValues, 'page')){
