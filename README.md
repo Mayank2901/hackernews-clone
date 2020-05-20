@@ -1,4 +1,6 @@
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Hosted on Heroku(https://hackernews-clone-mayank.herokuapp.com/)
+
 ## Project Structure
 
 Made using React, Redux, Express, Chart.js and implements Server Side Rendering
